@@ -46,7 +46,7 @@ export const productQuerySchema = z.object({
   categoryId: z.string().optional(),
   brandId: z.string().optional(),
   status: productStatusSchema.optional(),
-  includeDeleted: z.boolean().default(false),
+  includeDeleted: z.boolean().optional(),
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(100).default(20),
 });
