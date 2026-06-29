@@ -1,13 +1,15 @@
-import type { Prisma } from "@prisma/client";
+import type { Cart, CartItem, Product, ProductSku } from "@prisma/client";
 import type { RepoContext } from "@/lib/repository";
 import type { AddCartItemInput } from "../domain/cart";
 
+/** 购物车项(含 SKU + 商品) */
+export type CartLine = CartItem & {
+  sku: ProductSku;
+  product: Product;
+};
+
 /** 购物车(含项 + SKU + 商品) */
-export type CartWithItems = Prisma.CartGetPayload<{
-  include: {
-    items: { include: { sku: true; product: true } };
-  };
-}>;
+export type CartWithItems = Cart & { items: CartLine[] };
 
 export interface ICartRepository {
   findActiveCartByUserId(

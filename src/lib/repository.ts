@@ -1,21 +1,13 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 /**
- * 事务客户端类型:即 Prisma 交互式事务 `prisma.$transaction(async (tx) => ...)`
- * 回调参数 tx 的类型。去掉非数据访问方法,保留所有 model 的 CRUD。
+ * 事务客户端类型:Prisma 官方的 $transaction tx 类型(Omit<PrismaClient, denyList>)。
+ * 用于 RepoContext.tx,匹配 $transaction 回调的 tx 参数。
  *
- * Repository 方法接受可选的 tx,Service 在事务内编排多表写入时把 tx 透传下去,
- * 保证原子性;事务外则用默认 client。
+ * 注:Prisma 7 的 model delegates 是 getter,Omit 后在 tsc 下不可见(运行时仍在)。
+ * 所以 repository 内部 db(ctx) 会把结果 `as PrismaClient` 来访问 model。
  */
-export type TransactionClient = Omit<
-  PrismaClient,
-  | "$connect"
-  | "$disconnect"
-  | "$on"
-  | "$transaction"
-  | "$use"
-  | "$extends"
->;
+export type TransactionClient = Prisma.TransactionClient;
 
 /**
  * Repository 调用上下文。
