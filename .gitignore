@@ -20,5 +20,11 @@ prisma/schema.prisma
 *.log
 npm-debug.log*
 
+# TypeScript 增量构建缓存
+*.tsbuildinfo
+
+# Next.js 类型声明(自动生成)
+next-env.d.ts
+
 # 系统
 .DS_Store
