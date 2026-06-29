@@ -1,11 +1,8 @@
-// SQLite datasource 头
-// 由 prisma/scripts/build-schema.ts 在 DATABASE_PROVIDER=sqlite 时拼接使用
-
+// SQLite datasource 头(Prisma 7:url 已移到 prisma.config.ts)
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }

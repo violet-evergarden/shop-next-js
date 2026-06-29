@@ -18,6 +18,11 @@ export class ProductService {
     return this.products.findMany({ ...query, status: PRODUCT_STATUS.ACTIVE });
   }
 
+  /** 商品列表(后台管理,含全部状态 draft/active/archived) */
+  async listAll(query: ProductQueryInput) {
+    return this.products.findMany(query);
+  }
+
   /** 商品详情(含 SKU/库存/图片/分类/品牌) */
   async getDetail(slug: string) {
     const product = await this.products.findDetailBySlug(slug);

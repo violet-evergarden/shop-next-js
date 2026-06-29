@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { RepoContext } from "@/lib/repository";
+import type { RepoContext, TransactionClient } from "@/lib/repository";
 import { prisma } from "@/lib/db";
 import { USER_COUPON_STATUS } from "../domain/coupon";
 import type {
@@ -11,7 +11,7 @@ export class PrismaCouponRepository implements ICouponRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   private db(ctx?: RepoContext) {
-    return ctx?.tx ?? this.client;
+    return (ctx?.tx ?? this.client) as PrismaClient;
   }
 
   async findValidUserCoupon(

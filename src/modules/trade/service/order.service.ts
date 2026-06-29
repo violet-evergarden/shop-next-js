@@ -27,6 +27,7 @@ import {
   type ICartRepository,
   type IOrderRepository,
   type OrderQueryInput,
+  type CartLine,
 } from "../repository";
 
 /**
@@ -62,7 +63,9 @@ export class OrderService {
 
       // 2. 购物车已勾选项
       const cart = await this.carts.findActiveCartByUserId(userId, ctx);
-      const items = (cart?.items ?? []).filter((i) => i.selected);
+      const items: CartLine[] = (cart?.items ?? []).filter(
+        (i: CartLine) => i.selected,
+      );
       if (items.length === 0) {
         throw new ValidationError("没有可结算的商品");
       }

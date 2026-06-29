@@ -1,5 +1,5 @@
 import type { PrismaClient, Address } from "@prisma/client";
-import type { RepoContext } from "@/lib/repository";
+import type { RepoContext, TransactionClient } from "@/lib/repository";
 import { prisma } from "@/lib/db";
 import type { IAddressRepository } from "./address.repository";
 
@@ -7,7 +7,7 @@ export class PrismaAddressRepository implements IAddressRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   private db(ctx?: RepoContext) {
-    return ctx?.tx ?? this.client;
+    return (ctx?.tx ?? this.client) as PrismaClient;
   }
 
   async findById(id: string, ctx?: RepoContext): Promise<Address | null> {

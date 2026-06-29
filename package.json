@@ -21,19 +21,34 @@
     "schema": "prisma/schema.prisma"
   },
   "dependencies": {
-    "@prisma/client": "^6.1.0",
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@prisma/adapter-mariadb": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "better-sqlite3": "^12.11.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
     "ethers": "^6.13.0",
     "jose": "^5.9.0",
+    "lucide-react": "^1.22.0",
+    "mariadb": "^3.5.3",
     "next": "^15.1.0",
+    "pg": "^8.22.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.6.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.1",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.10.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "prisma": "^6.1.0",
+    "prisma": "^7.8.0",
+    "tailwindcss": "^4.3.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.0"
   }

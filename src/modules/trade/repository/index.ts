@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { PrismaCartRepository } from "./prisma-cart.repository";
 import { PrismaOrderRepository } from "./prisma-order.repository";
-import type { ICartRepository, CartWithItems } from "./cart.repository";
+import type { ICartRepository, CartWithItems, CartLine } from "./cart.repository";
 import type {
   IOrderRepository,
   OrderWithItems,
@@ -13,6 +13,7 @@ export type {
   ICartRepository,
   IOrderRepository,
   CartWithItems,
+  CartLine,
   OrderWithItems,
   OrderQueryInput,
 };

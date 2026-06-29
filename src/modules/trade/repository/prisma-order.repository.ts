@@ -1,5 +1,5 @@
 import type { PrismaClient, Order } from "@prisma/client";
-import type { RepoContext } from "@/lib/repository";
+import type { RepoContext, TransactionClient } from "@/lib/repository";
 import { prisma } from "@/lib/db";
 import { toSkip, toPaginated, type Paginated } from "@/lib/types";
 import type {
@@ -20,7 +20,7 @@ export class PrismaOrderRepository implements IOrderRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   private db(ctx?: RepoContext) {
-    return ctx?.tx ?? this.client;
+    return (ctx?.tx ?? this.client) as PrismaClient;
   }
 
   async createWithItems(

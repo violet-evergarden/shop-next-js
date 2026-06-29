@@ -1,5 +1,5 @@
 import type { PrismaClient, Permission } from "@prisma/client";
-import type { RepoContext } from "@/lib/repository";
+import type { RepoContext, TransactionClient } from "@/lib/repository";
 import { prisma } from "@/lib/db";
 import { PERMISSION_TYPE } from "../domain/permission";
 import type { IPermissionRepository } from "./permission.repository";
@@ -8,7 +8,7 @@ export class PrismaPermissionRepository implements IPermissionRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   private db(ctx?: RepoContext) {
-    return ctx?.tx ?? this.client;
+    return (ctx?.tx ?? this.client) as PrismaClient;
   }
 
   async findByAdminId(

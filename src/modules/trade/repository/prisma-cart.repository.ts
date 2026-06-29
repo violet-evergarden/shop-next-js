@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { RepoContext } from "@/lib/repository";
+import type { RepoContext, TransactionClient } from "@/lib/repository";
 import { prisma } from "@/lib/db";
 import type { ICartRepository, CartWithItems } from "./cart.repository";
 import type { AddCartItemInput } from "../domain/cart";
@@ -8,7 +8,7 @@ export class PrismaCartRepository implements ICartRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   private db(ctx?: RepoContext) {
-    return ctx?.tx ?? this.client;
+    return (ctx?.tx ?? this.client) as PrismaClient;
   }
 
   async findActiveCartByUserId(
