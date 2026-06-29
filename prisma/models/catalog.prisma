@@ -1,0 +1,177 @@
+// ============================================================================
+// [商品模块] Category / Brand / Tag / Product / ProductImage / ProductSku
+//           / ProductTag / Inventory
+// ============================================================================
+
+model Category {
+  id        String  @id @default(cuid())
+  parentId  String? // 自关联树形
+  name      String
+  code      String  @unique
+  icon      String?
+  image     String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+}
+
+model Brand {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  logo        String?
+  description String?
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  products Product[]
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  type String? // 标签分组用途
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  products ProductTag[]
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  categoryId    String?
+  brandId       String?
+  name          String
+  slug          String   @unique
+  subtitle      String?
+  description   String? // 长描述
+  coverImage    String?
+  price         Decimal // 展示/起售价
+  originalPrice Decimal? // 划线价
+  status        String   @default("draft") // draft | active | archived
+  sales         Int      @default(0) // 销量
+  rating        Decimal? // 评分
+  reviewCount   Int      @default(0)
+  attributes    Json? // SPU 级属性
+  isActive      Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  category   Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brand      Brand?         @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  images     ProductImage[]
+  skus       ProductSku[]
+  tags       ProductTag[]
+  favorites  Favorite[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([status])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+  isCover   Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductSku {
+  id            String   @id @default(cuid())
+  productId     String
+  skuCode       String   @unique
+  name          String?
+  price         Decimal // 售价
+  originalPrice Decimal?
+  attributes    Json? // 规格组合 {"颜色":"红","尺码":"L"}
+  barcode       String?
+  weight        Decimal?
+  isActive      Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory  Inventory?
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([productId])
+}
+
+model ProductTag {
+  id        String @id @default(cuid())
+  productId String
+  tagId     String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tagId])
+}
+
+model Inventory {
+  id          String @id @default(cuid())
+  skuId       String @unique // 与 SKU 一对一
+  productId   String // 冗余便于按商品聚合
+  quantity    Int    @default(0) // 可售库存
+  locked      Int    @default(0) // 下单未支付锁定
+  safetyStock Int    @default(0) // 安全库存
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  sku ProductSku @relation(fields: [skuId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}

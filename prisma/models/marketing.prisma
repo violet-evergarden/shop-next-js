@@ -1,0 +1,52 @@
+// ============================================================================
+// [营销模块] Coupon / UserCoupon
+// ============================================================================
+
+model Coupon {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  name           String
+  type           String // fixed(满减) | percentage(折扣)
+  value          Decimal // 满减金额 或 折扣率
+  minAmount      Decimal  @default(0) // 满减门槛
+  maxDiscount    Decimal? // 折扣上限
+  totalQuantity  Int? // 发行总量,null=无限
+  issuedQuantity Int     @default(0)
+  usedQuantity   Int     @default(0)
+  validFrom      DateTime?
+  validTo        DateTime?
+  isActive       Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  userCoupons UserCoupon[]
+  orders      Order[]
+
+  @@index([isActive])
+}
+
+model UserCoupon {
+  id       String   @id @default(cuid())
+  userId   String
+  couponId String
+  status   String   @default("unused") // unused | used | expired
+  usedAt   DateTime?
+  orderId  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Restrict)
+  order  Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([couponId])
+}

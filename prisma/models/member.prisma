@@ -1,0 +1,92 @@
+// ============================================================================
+// [会员模块] User / UserLevel / Address / Favorite
+// ============================================================================
+
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique // MetaMask 地址(小写)
+  walletType    String?  // eth | bsc | polygon ...
+  nonce         String?  // 签名登录一次性 nonce
+  username      String?
+  avatar        String?
+  email         String?  @unique
+  phone         String?  @unique
+  points        Int      @default(0) // 积分
+  levelId       String?
+  status        String   @default("active") // active | disabled
+  lastLoginAt   DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  level       UserLevel? @relation(fields: [levelId], references: [id], onDelete: SetNull)
+  addresses   Address[]
+  favorites   Favorite[]
+  cart        Cart?
+  orders      Order[]
+  userCoupons UserCoupon[]
+
+  @@index([levelId])
+}
+
+model UserLevel {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  minPoints Int      // 升级所需积分
+  discount  Decimal? // 等级折扣率,如 0.95
+  sortOrder Int      @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  users User[]
+}
+
+model Address {
+  id        String @id @default(cuid())
+  userId    String
+  receiver  String // 收货人
+  phone     String
+  province  String
+  city      String
+  district  String
+  detail    String // 详细地址
+  zipCode   String?
+  tag       String? // 家 | 公司
+  isDefault Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Favorite {
+  id        String @id @default(cuid())
+  userId    String
+  productId String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+}

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(command -v nvm)",
+      "Read(//Users/jax/.nvm/versions/node/**)",
+      "Bash(command -v fnm)",
+      "Bash(command -v n)",
+      "Bash(command -v volta)"
+    ]
+  }
+}

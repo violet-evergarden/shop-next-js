@@ -1,0 +1,129 @@
+// ============================================================================
+// [RBAC 模块] Admin / Role / Permission / RolePermission / AdminRole / OperationLog
+// 菜单由 Permission(type=menu,带 path/icon/component) 动态生成,不硬编码
+// ============================================================================
+
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String?  @unique
+  passwordHash String
+  realName     String?
+  avatar       String?
+  phone        String?
+  status       String   @default("active") // active | disabled
+  lastLoginAt  DateTime?
+  lastLoginIp  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  roles  AdminRole[]
+  opLogs OperationLog[]
+}
+
+model Role {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  code        String  @unique
+  description String?
+  isActive    Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  admins      AdminRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id        String  @id @default(cuid())
+  parentId  String? // 权限/菜单树
+  name      String
+  code      String  @unique // 如 product:create
+  type      String  @default("action") // menu | action | api
+  path      String? // 菜单路由(type=menu 时用)
+  icon      String?
+  component String? // 前端组件路径(type=menu 时用)
+  sortOrder Int     @default(0)
+  isVisible Boolean @default(true) // 是否在菜单显示
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  parent    Permission?  @relation("PermissionTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Permission[] @relation("PermissionTree")
+  rolePerms RolePermission[]
+
+  @@index([parentId])
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model AdminRole {
+  id      String @id @default(cuid())
+  adminId String
+  roleId  String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  role  Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, roleId])
+}
+
+model OperationLog {
+  id           String @id @default(cuid())
+  adminId      String?
+  module       String // 模块名
+  action       String // 操作描述
+  method       String? // GET | POST ...
+  path         String? // 请求路径
+  params       String? // 请求参数(JSON 字符串)
+  ip           String?
+  userAgent    String?
+  status       Int? // 1=成功 0=失败
+  duration     Int? // 耗时 ms
+  errorMessage String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  admin Admin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([adminId])
+  @@index([module])
+}

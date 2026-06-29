@@ -1,0 +1,106 @@
+// ============================================================================
+// [交易模块] Cart / CartItem / Order / OrderItem
+// 订单与订单项含快照字段,历史订单不受商品/地址后续变动影响
+// ============================================================================
+
+model Cart {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  skuId     String
+  productId String
+  quantity  Int
+  selected  Boolean @default(true) // 是否勾选
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  cart    Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  sku     ProductSku @relation(fields: [skuId], references: [id], onDelete: Cascade)
+  product Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, skuId])
+  @@index([productId])
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  orderNo        String   @unique // 对外订单号
+  userId         String
+  status         String   @default("pending_payment") // pending_payment|paid|shipped|completed|refunded|cancelled
+  totalAmount    Decimal // 商品总价
+  discountAmount Decimal  @default(0) // 优惠金额
+  shippingFee    Decimal  @default(0) // 运费
+  payAmount      Decimal // 实付金额
+  // 收货地址快照(用户改地址不影响历史订单)
+  receiverName    String
+  receiverPhone   String
+  receiverAddress String
+  // 支付
+  payMethod String?
+  paidAt    DateTime?
+  // 物流
+  shipMethod String?
+  shipNo     String?
+  shippedAt  DateTime?
+  completedAt DateTime?
+  remark     String?
+  couponId   String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items       OrderItem[]
+  coupon      Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  userCoupons UserCoupon[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  skuId     String?
+  // 商品快照(商品下架/改价不影响历史订单)
+  productName  String
+  productImage String?
+  skuName      String?
+  price        Decimal // 下单时单价
+  quantity     Int
+  totalAmount  Decimal // 小计
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  order   Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+  sku     ProductSku? @relation(fields: [skuId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+}

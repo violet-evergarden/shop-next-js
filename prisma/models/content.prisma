@@ -1,0 +1,59 @@
+// ============================================================================
+// [内容模块] Banner / Announcement / Config
+// ============================================================================
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  image     String
+  link      String?
+  position  String   @default("home") // home | category ...
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  startAt   DateTime?
+  endAt     DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  @@index([position])
+  @@index([isActive])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  type      String   @default("notice") // notice | system
+  isActive  Boolean  @default(true)
+  startAt   DateTime?
+  endAt     DateTime?
+  sortOrder Int      @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  @@index([isActive])
+}
+
+model Config {
+  id          String @id @default(cuid())
+  key         String @unique
+  value       Json? // 结构化配置值
+  group       String @default("system") // system | home ...
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  @@index([group])
+}
