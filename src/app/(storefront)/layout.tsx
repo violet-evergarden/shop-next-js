@@ -23,6 +23,12 @@ export default function StorefrontLayout({
             <Link href="/user/orders" className="hover:underline">
               我的订单
             </Link>
+            <Link href="/user/coupons" className="hover:underline">
+              优惠券
+            </Link>
+            <Link href="/user/favorites" className="hover:underline">
+              收藏
+            </Link>
             <WalletLogin />
           </nav>
         </div>
