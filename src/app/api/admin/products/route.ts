@@ -1,8 +1,12 @@
 import { withErrorHandler } from "@/lib/http/with-handler";
+import { withAdminAction } from "@/lib/http/with-audit";
 import { ApiResponse } from "@/lib/response";
 import { requireAdmin } from "@/lib/auth/session";
 import { ProductService } from "@/modules/catalog/service/product.service";
-import { productQuerySchema } from "@/modules/catalog/domain/product";
+import {
+  productQuerySchema,
+  createProductSchema,
+} from "@/modules/catalog/domain/product";
 
 /** 后台商品列表(含全部状态) */
 export const GET = withErrorHandler(async (req) => {
@@ -18,4 +22,12 @@ export const GET = withErrorHandler(async (req) => {
   });
   const service = new ProductService();
   return ApiResponse.ok(await service.listAll(query));
+});
+
+/** 新增商品(自动记操作日志) */
+export const POST = withAdminAction("catalog", "新增商品", async (req) => {
+  const admin = await requireAdmin();
+  const input = createProductSchema.parse(await req.json());
+  const service = new ProductService();
+  return ApiResponse.ok(await service.create(input, admin.adminId));
 });
