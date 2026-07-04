@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { ProductService } from "@/modules/catalog/service/product.service";
 import { AddToCart } from "@/components/storefront/add-to-cart";
+import { FavoriteButton } from "@/components/storefront/favorite-button";
 
 export default async function ProductDetailPage({
   params,
@@ -48,8 +49,9 @@ export default async function ProductDetailPage({
               {product.description}
             </p>
           )}
-          <div className="mt-6">
+          <div className="mt-6 space-y-3">
             <AddToCart productId={product.id} productSlug={product.slug} skus={product.skus} />
+            <FavoriteButton productId={product.id} />
           </div>
         </div>
       </div>
