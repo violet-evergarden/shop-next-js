@@ -27,6 +27,7 @@ import {
   type ICartRepository,
   type IOrderRepository,
   type OrderQueryInput,
+  type OrderAdminQuery,
   type CartLine,
 } from "../repository";
 
@@ -182,5 +183,15 @@ export class OrderService {
       throw new NotFoundError("订单不存在");
     }
     return order;
+  }
+
+  /** 后台:全部订单列表 */
+  async listAll(query: OrderAdminQuery) {
+    return this.orders.findAll(query);
+  }
+
+  /** 后台:更新订单状态 */
+  async updateStatus(id: string, status: string, actorId?: string) {
+    await this.orders.updateStatus(id, status, { actorId });
   }
 }

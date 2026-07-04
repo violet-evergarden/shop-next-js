@@ -1,4 +1,4 @@
-import type { Order, Prisma } from "@prisma/client";
+import type { Order, OrderItem, Prisma, User } from "@prisma/client";
 import type { RepoContext } from "@/lib/repository";
 import type { Paginated } from "@/lib/types";
 
@@ -6,6 +6,9 @@ import type { Paginated } from "@/lib/types";
 export type OrderWithItems = Prisma.OrderGetPayload<{
   include: { items: true };
 }>;
+
+/** 订单(含用户 + 订单项),用于后台列表 */
+export type OrderWithUserItems = Order & { user: User; items: OrderItem[] };
 
 export interface CreateOrderItemData {
   productId: string;
@@ -39,6 +42,13 @@ export interface OrderQueryInput {
   status?: string;
 }
 
+export interface OrderAdminQuery {
+  page: number;
+  pageSize: number;
+  status?: string;
+  userId?: string;
+}
+
 export interface IOrderRepository {
   createWithItems(
     data: CreateOrderData,
@@ -54,4 +64,15 @@ export interface IOrderRepository {
     query: OrderQueryInput,
     ctx?: RepoContext,
   ): Promise<Paginated<Order>>;
+  /** 后台:全部订单(可按 status/userId 过滤) */
+  findAll(
+    query: OrderAdminQuery,
+    ctx?: RepoContext,
+  ): Promise<Paginated<OrderWithUserItems>>;
+  /** 后台:更新订单状态 */
+  updateStatus(
+    id: string,
+    status: string,
+    ctx?: RepoContext,
+  ): Promise<void>;
 }

@@ -7,6 +7,7 @@ import type {
   IOrderRepository,
   OrderWithItems,
   OrderQueryInput,
+  OrderAdminQuery,
 } from "./order.repository";
 
 export type {
@@ -16,6 +17,7 @@ export type {
   CartLine,
   OrderWithItems,
   OrderQueryInput,
+  OrderAdminQuery,
 };
 
 export function createCartRepository(
