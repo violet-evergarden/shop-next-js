@@ -28,6 +28,7 @@ const MENUS: MenuSeed[] = [
   { code: "system.admins", name: "管理员", path: "/admin/system/admins", sortOrder: 1, parent: "system" },
   { code: "system.roles", name: "角色", path: "/admin/system/roles", sortOrder: 2, parent: "system" },
   { code: "system.permissions", name: "权限", path: "/admin/system/permissions", sortOrder: 3, parent: "system" },
+  { code: "system.operation-logs", name: "操作日志", path: "/admin/system/operation-logs", sortOrder: 4, parent: "system" },
 ];
 
 async function main() {
