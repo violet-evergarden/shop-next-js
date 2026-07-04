@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { PrismaAdminRepository } from "./prisma-admin.repository";
 import { PrismaPermissionRepository } from "./prisma-permission.repository";
 import { PrismaOperationLogRepository } from "./prisma-operation-log.repository";
+import { PrismaRoleRepository } from "./prisma-role.repository";
 import type { IAdminRepository } from "./admin.repository";
 import type { IPermissionRepository } from "./permission.repository";
 import type {
@@ -10,11 +11,13 @@ import type {
   CreateOperationLogInput,
   OperationLogQuery,
 } from "./operation-log.repository";
+import type { IRoleRepository } from "./role.repository";
 
 export type {
   IAdminRepository,
   IPermissionRepository,
   IOperationLogRepository,
+  IRoleRepository,
   CreateOperationLogInput,
   OperationLogQuery,
 };
@@ -35,4 +38,10 @@ export function createOperationLogRepository(
   client: PrismaClient = prisma,
 ): IOperationLogRepository {
   return new PrismaOperationLogRepository(client);
+}
+
+export function createRoleRepository(
+  client: PrismaClient = prisma,
+): IRoleRepository {
+  return new PrismaRoleRepository(client);
 }
