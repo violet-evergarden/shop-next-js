@@ -15,7 +15,8 @@
     "db:push": "npm run db:schema && prisma db push",
     "db:migrate": "npm run db:schema && prisma migrate dev",
     "db:studio": "npm run db:schema && prisma studio",
-    "db:seed": "npm run db:schema && prisma db seed"
+    "db:seed": "npm run db:schema && prisma db seed",
+    "test": "vitest run"
   },
   "prisma": {
     "schema": "prisma/schema.prisma"
@@ -50,6 +51,7 @@
     "prisma": "^7.8.0",
     "tailwindcss": "^4.3.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.9"
   }
 }
