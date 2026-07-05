@@ -7,8 +7,6 @@ export interface AddToCartSku {
   id: string;
   name: string | null;
   skuCode: string;
-  price: number;
-  isActive: boolean;
   inventory: { quantity: number } | null;
 }
 
@@ -18,7 +16,6 @@ export function AddToCart({
   skus,
 }: {
   productId: string;
-  productSlug: string;
   skus: AddToCartSku[];
 }) {
   const router = useRouter();
