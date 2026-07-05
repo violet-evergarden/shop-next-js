@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import type { ProductSku } from "@prisma/client";
+export interface AddToCartSku {
+  id: string;
+  name: string | null;
+  skuCode: string;
+  price: number;
+  isActive: boolean;
+  inventory: { quantity: number } | null;
+}
 
 /** 加购组件:选规格 + 数量 → 调 /cart/items。未登录提示。 */
 export function AddToCart({
@@ -12,7 +19,7 @@ export function AddToCart({
 }: {
   productId: string;
   productSlug: string;
-  skus: (ProductSku & { inventory: { quantity: number } | null })[];
+  skus: AddToCartSku[];
 }) {
   const router = useRouter();
   const firstSku = skus[0];

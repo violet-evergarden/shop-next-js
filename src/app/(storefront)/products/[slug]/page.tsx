@@ -50,7 +50,18 @@ export default async function ProductDetailPage({
             </p>
           )}
           <div className="mt-6 space-y-3">
-            <AddToCart productId={product.id} productSlug={product.slug} skus={product.skus} />
+            <AddToCart
+              productId={product.id}
+              productSlug={product.slug}
+              skus={product.skus.map((s) => ({
+                id: s.id,
+                name: s.name,
+                skuCode: s.skuCode,
+                price: Number(s.price),
+                isActive: s.isActive,
+                inventory: s.inventory ? { quantity: s.inventory.quantity } : null,
+              }))}
+            />
             <FavoriteButton productId={product.id} />
           </div>
         </div>
