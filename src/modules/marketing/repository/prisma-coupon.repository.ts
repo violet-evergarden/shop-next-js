@@ -1,6 +1,7 @@
-import type { PrismaClient } from "@prisma/client";
-import type { RepoContext, TransactionClient } from "@/lib/repository";
+import type { PrismaClient, Coupon, UserCoupon } from "@prisma/client";
+import type { RepoContext } from "@/lib/repository";
 import { prisma } from "@/lib/db";
+import { NotFoundError, ConflictError } from "@/lib/errors";
 import { USER_COUPON_STATUS } from "../domain/coupon";
 import type {
   ICouponRepository,
@@ -65,6 +66,54 @@ export class PrismaCouponRepository implements ICouponRepository {
       },
       include: { coupon: true },
       orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findClaimable(ctx?: RepoContext): Promise<Coupon[]> {
+    const now = new Date();
+    return this.db(ctx).coupon.findMany({
+      where: {
+        isActive: true,
+        OR: [{ validTo: null }, { validTo: { gt: now } }],
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async claim(
+    userId: string,
+    couponId: string,
+    ctx?: RepoContext,
+  ): Promise<UserCoupon> {
+    // 顶层领取操作,自己开事务(claim 一般不在外部事务里)
+    return this.client.$transaction(async (tx) => {
+      const coupon = await tx.coupon.findUnique({ where: { id: couponId } });
+      if (!coupon || !coupon.isActive) {
+        throw new NotFoundError("优惠券不存在");
+      }
+      if (
+        coupon.totalQuantity !== null &&
+        coupon.issuedQuantity >= coupon.totalQuantity
+      ) {
+        throw new ConflictError("优惠券已领完");
+      }
+      // 防重复领取
+      const existing = await tx.userCoupon.findFirst({
+        where: { userId, couponId },
+      });
+      if (existing) {
+        throw new ConflictError("已领取过该优惠券");
+      }
+      const [uc] = await Promise.all([
+        tx.userCoupon.create({
+          data: { userId, couponId, createdBy: ctx?.actorId },
+        }),
+        tx.coupon.update({
+          where: { id: couponId },
+          data: { issuedQuantity: { increment: 1 } },
+        }),
+      ]);
+      return uc;
     });
   }
 }

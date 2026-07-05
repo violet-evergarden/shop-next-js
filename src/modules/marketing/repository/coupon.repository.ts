@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Coupon, Prisma, UserCoupon } from "@prisma/client";
 import type { RepoContext } from "@/lib/repository";
 
 /** 用户券(含券模板) */
@@ -24,4 +24,12 @@ export interface ICouponRepository {
     userId: string,
     ctx?: RepoContext,
   ): Promise<UserCouponWithCoupon[]>;
+  /** 可领取的券模板(启用 + 有效期内) */
+  findClaimable(ctx?: RepoContext): Promise<Coupon[]>;
+  /** 领取(事务:校验可领 + 防重复 + 建 UserCoupon + issuedQuantity++) */
+  claim(
+    userId: string,
+    couponId: string,
+    ctx?: RepoContext,
+  ): Promise<UserCoupon>;
 }

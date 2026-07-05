@@ -1,5 +1,15 @@
-import type { User } from "@prisma/client";
+import type { User, UserLevel } from "@prisma/client";
 import type { RepoContext } from "@/lib/repository";
+import type { Paginated } from "@/lib/types";
+
+export type UserWithLevel = User & { level: UserLevel | null };
+
+export interface UserAdminQuery {
+  page: number;
+  pageSize: number;
+  status?: string;
+  keyword?: string;
+}
 
 export interface IUserRepository {
   findById(id: string, ctx?: RepoContext): Promise<User | null>;
@@ -12,4 +22,9 @@ export interface IUserRepository {
   ): Promise<User>;
   updateNonce(id: string, nonce: string, ctx?: RepoContext): Promise<void>;
   updatePoints(id: string, delta: number, ctx?: RepoContext): Promise<void>;
+  /** 后台:用户列表(含等级,可按 status/keyword 过滤) */
+  findAll(
+    query: UserAdminQuery,
+    ctx?: RepoContext,
+  ): Promise<Paginated<UserWithLevel>>;
 }

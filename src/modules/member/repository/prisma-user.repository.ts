@@ -1,7 +1,12 @@
 import type { PrismaClient, User } from "@prisma/client";
-import type { RepoContext, TransactionClient } from "@/lib/repository";
+import type { RepoContext } from "@/lib/repository";
 import { prisma } from "@/lib/db";
-import type { IUserRepository } from "./user.repository";
+import { toSkip, toPaginated, type Paginated } from "@/lib/types";
+import type {
+  IUserRepository,
+  UserWithLevel,
+  UserAdminQuery,
+} from "./user.repository";
 
 export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
@@ -29,7 +34,7 @@ export class PrismaUserRepository implements IUserRepository {
     return this.db(ctx).user.upsert({
       where: { walletAddress: address },
       create: { walletAddress: address, nonce },
-      update: { nonce }, // 已存在则刷新 nonce
+      update: { nonce },
     });
   }
 
@@ -42,5 +47,34 @@ export class PrismaUserRepository implements IUserRepository {
       where: { id },
       data: { points: { increment: delta } },
     });
+  }
+
+  async findAll(
+    query: UserAdminQuery,
+    ctx?: RepoContext,
+  ): Promise<Paginated<UserWithLevel>> {
+    const where = {
+      deletedAt: null,
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.keyword
+        ? {
+            OR: [
+              { username: { contains: query.keyword } },
+              { walletAddress: { contains: query.keyword } },
+            ],
+          }
+        : {}),
+    };
+    const [items, total] = await Promise.all([
+      this.db(ctx).user.findMany({
+        where,
+        skip: toSkip(query),
+        take: query.pageSize,
+        orderBy: { createdAt: "desc" },
+        include: { level: true },
+      }),
+      this.db(ctx).user.count({ where }),
+    ]);
+    return toPaginated(items, total, query);
   }
 }

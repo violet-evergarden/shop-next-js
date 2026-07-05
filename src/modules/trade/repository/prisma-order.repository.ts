@@ -6,7 +6,9 @@ import type {
   CreateOrderData,
   IOrderRepository,
   OrderQueryInput,
+  OrderAdminQuery,
   OrderWithItems,
+  OrderWithUserItems,
 } from "./order.repository";
 
 /** 生成对外订单号(普通 Node 运行时,可用 Date/random) */
@@ -96,5 +98,38 @@ export class PrismaOrderRepository implements IOrderRepository {
       this.db(ctx).order.count({ where }),
     ]);
     return toPaginated(items, total, query);
+  }
+
+  async findAll(
+    query: OrderAdminQuery,
+    ctx?: RepoContext,
+  ): Promise<Paginated<OrderWithUserItems>> {
+    const where = {
+      deletedAt: null,
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.userId ? { userId: query.userId } : {}),
+    };
+    const [items, total] = await Promise.all([
+      this.db(ctx).order.findMany({
+        where,
+        skip: toSkip(query),
+        take: query.pageSize,
+        orderBy: { createdAt: "desc" },
+        include: { items: true, user: true },
+      }),
+      this.db(ctx).order.count({ where }),
+    ]);
+    return toPaginated(items, total, query);
+  }
+
+  async updateStatus(
+    id: string,
+    status: string,
+    ctx?: RepoContext,
+  ): Promise<void> {
+    await this.db(ctx).order.update({
+      where: { id },
+      data: { status, updatedBy: ctx?.actorId },
+    });
   }
 }
