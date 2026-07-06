@@ -89,6 +89,22 @@ async function main() {
     update: {},
   });
   console.log("✓ 管理员账号: admin / admin123");
+
+  // 4. 会员等级
+  const levels = [
+    { code: "bronze", name: "青铜", minPoints: 0, discount: 1.0, sortOrder: 1 },
+    { code: "silver", name: "白银", minPoints: 500, discount: 0.98, sortOrder: 2 },
+    { code: "gold", name: "黄金", minPoints: 2000, discount: 0.95, sortOrder: 3 },
+    { code: "platinum", name: "铂金", minPoints: 5000, discount: 0.9, sortOrder: 4 },
+  ];
+  for (const lv of levels) {
+    await prisma.userLevel.upsert({
+      where: { code: lv.code },
+      create: lv,
+      update: {},
+    });
+  }
+  console.log(`✓ 会员等级: ${levels.map((l) => l.name).join("/")}`);
 }
 
 main().catch((e) => {

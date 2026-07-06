@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth/session";
 import { OrderService } from "@/modules/trade/service/order.service";
+import { PayButton } from "@/components/storefront/pay-button";
 
 const STATUS_LABEL: Record<string, string> = {
   pending_payment: "待付款",
@@ -51,6 +52,11 @@ export default async function OrdersPage() {
                   ¥{o.payAmount.toString()}
                 </span>
               </div>
+              {o.status === "pending_payment" && (
+                <div className="mt-3 border-t pt-3">
+                  <PayButton orderId={o.id} />
+                </div>
+              )}
             </div>
           ))}
         </div>

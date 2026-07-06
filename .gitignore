@@ -29,3 +29,4 @@ next-env.d.ts
 # 系统
 .DS_Store
 .gstack/
+uploads/
