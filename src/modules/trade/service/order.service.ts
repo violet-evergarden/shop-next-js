@@ -12,7 +12,9 @@ import {
 } from "@/modules/marketing/repository";
 import {
   createAddressRepository,
+  createUserRepository,
   type IAddressRepository,
+  type IUserRepository,
 } from "@/modules/member/repository";
 import {
   calcDiscount,
@@ -45,6 +47,7 @@ export class OrderService {
     private readonly products: IProductRepository = createProductRepository(),
     private readonly coupons: ICouponRepository = createCouponRepository(),
     private readonly addresses: IAddressRepository = createAddressRepository(),
+    private readonly users: IUserRepository = createUserRepository(),
   ) {}
 
   async checkout(
@@ -166,6 +169,26 @@ export class OrderService {
 
       // 9. 清空已下单的购物车项
       await this.carts.removeItems(items.map((i) => i.id), ctx);
+
+      // 10. 积分:每消费 1 元 = 1 积分(取整),自动加到用户
+      const earnedPoints = Math.floor(payAmount);
+      if (earnedPoints > 0) {
+        await this.users.updatePoints(userId, earnedPoints, ctx);
+        // 自动升级:查所有等级(minPoints <= 用户总积分),取最高的
+        const user = await this.users.findById(userId, ctx);
+        if (user) {
+          const levels = await prisma.userLevel.findMany({
+            where: { minPoints: { lte: user.points } },
+            orderBy: { minPoints: "desc" },
+          });
+          if (levels.length > 0 && user.levelId !== levels[0]!.id) {
+            await prisma.user.update({
+              where: { id: userId },
+              data: { levelId: levels[0]!.id },
+            });
+          }
+        }
+      }
 
       return { orderNo: order.orderNo, payAmount: Number(order.payAmount) };
     });
