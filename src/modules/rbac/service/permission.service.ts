@@ -22,4 +22,9 @@ export class PermissionService {
     const menus = await this.perms.findMenusByAdminId(adminId);
     return buildMenuTree(menus);
   }
+
+  /** 全部权限列表(后台管理页) */
+  async listAll(): Promise<Permission[]> {
+    return this.perms.findAll();
+  }
 }

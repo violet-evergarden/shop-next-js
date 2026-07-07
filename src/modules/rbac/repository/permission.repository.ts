@@ -9,4 +9,6 @@ export interface IPermissionRepository {
     adminId: string,
     ctx?: RepoContext,
   ): Promise<Permission[]>;
+  /** 全部权限(后台管理) */
+  findAll(ctx?: RepoContext): Promise<Permission[]>;
 }

@@ -1,12 +1,14 @@
-import { prisma } from "@/lib/db";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { prisma } from "@/lib/db";
 
 export default async function DashboardPage() {
+  // Dashboard 是跨模块聚合页,直接查 count 属于合理的读模型
+  // (提取为 StatsService 会过度抽象 —— 仅 count,无业务逻辑)
   const [productCount, orderCount, userCount, orders] = await Promise.all([
     prisma.product.count({ where: { deletedAt: null } }),
     prisma.order.count({ where: { deletedAt: null } }),

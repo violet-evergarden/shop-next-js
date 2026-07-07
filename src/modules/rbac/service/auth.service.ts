@@ -1,4 +1,4 @@
-import type { IAdminRepository } from "../repository";
+import type { IAdminRepository, AdminWithRoles } from "../repository";
 import { createAdminRepository } from "../repository";
 import { verifyPassword } from "@/lib/auth/password";
 import { signAdminToken } from "@/lib/auth/jwt";
@@ -32,5 +32,10 @@ export class AdminAuthService {
       adminId: admin.id,
       username: admin.username,
     });
+  }
+
+  /** 全部管理员(含角色),后台管理页 */
+  async listAllWithRoles(): Promise<AdminWithRoles[]> {
+    return this.admins.findAllWithRoles();
   }
 }

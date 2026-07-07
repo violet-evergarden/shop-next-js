@@ -4,7 +4,7 @@ import { PrismaAdminRepository } from "./prisma-admin.repository";
 import { PrismaPermissionRepository } from "./prisma-permission.repository";
 import { PrismaOperationLogRepository } from "./prisma-operation-log.repository";
 import { PrismaRoleRepository } from "./prisma-role.repository";
-import type { IAdminRepository } from "./admin.repository";
+import type { IAdminRepository, AdminWithRoles } from "./admin.repository";
 import type { IPermissionRepository } from "./permission.repository";
 import type {
   IOperationLogRepository,
@@ -15,6 +15,7 @@ import type { IRoleRepository } from "./role.repository";
 
 export type {
   IAdminRepository,
+  AdminWithRoles,
   IPermissionRepository,
   IOperationLogRepository,
   IRoleRepository,

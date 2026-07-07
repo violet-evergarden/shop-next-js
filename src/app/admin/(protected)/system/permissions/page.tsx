@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { PermissionService } from "@/modules/rbac/service/permission.service";
 import {
   Table,
   TableBody,
@@ -9,10 +9,8 @@ import {
 } from "@/components/ui/table";
 
 export default async function AdminPermissionsPage() {
-  const permissions = await prisma.permission.findMany({
-    where: { deletedAt: null },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
+  const service = new PermissionService();
+  const permissions = await service.listAll();
 
   return (
     <div className="space-y-4">

@@ -1,3 +1,4 @@
+import { AdminAuthService } from "@/modules/rbac/service/auth.service";
 import {
   Table,
   TableBody,
@@ -6,16 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { requireAdmin } from "@/lib/auth/session";
-import { prisma } from "@/lib/db";
 
 export default async function AdminAdminsPage() {
-  await requireAdmin();
-  const admins = await prisma.admin.findMany({
-    where: { deletedAt: null },
-    orderBy: { createdAt: "asc" },
-    include: { roles: { include: { role: true } } },
-  });
+  const admins = await new AdminAuthService().listAllWithRoles();
 
   return (
     <div className="space-y-4">
