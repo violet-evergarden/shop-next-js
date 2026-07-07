@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import type { RepoContext, TransactionClient } from "@/lib/repository";
 import { prisma } from "@/lib/db";
+import { ConflictError } from "@/lib/errors";
 import type { ICartRepository, CartWithItems } from "./cart.repository";
 import type { AddCartItemInput } from "../domain/cart";
 
@@ -26,13 +27,30 @@ export class PrismaCartRepository implements ICartRepository {
     data: AddCartItemInput,
     ctx?: RepoContext,
   ): Promise<CartWithItems> {
-    // 确保用户有购物车(Cart↔User 一对一)
+    // 校验 SKU 存在 + active + 归属正确 + 库存充足
+    const sku = await this.db(ctx).productSku.findUnique({
+      where: { id: data.skuId },
+      include: { inventory: true },
+    });
+    if (!sku || !sku.isActive) {
+      throw new ConflictError("规格不存在或已下架");
+    }
+    if (sku.productId !== data.productId) {
+      throw new ConflictError("规格与商品不匹配");
+    }
+    const currentQty = await this.db(ctx).cartItem.findUnique({
+      where: { cartId_skuId: { cartId: (await this.db(ctx).cart.findUnique({ where: { userId } }))!.id, skuId: data.skuId } },
+    }).then((ci) => ci?.quantity ?? 0).catch(() => 0);
+    const stock = sku.inventory?.quantity ?? 0;
+    if (currentQty + data.quantity > stock) {
+      throw new ConflictError(`库存不足(剩余 ${stock})`);
+    }
+
     const cart = await this.db(ctx).cart.upsert({
       where: { userId },
       create: { userId },
       update: {},
     });
-    // 同 SKU 累加数量(利用 cartId_skuId 唯一约束)
     await this.db(ctx).cartItem.upsert({
       where: { cartId_skuId: { cartId: cart.id, skuId: data.skuId } },
       create: {
