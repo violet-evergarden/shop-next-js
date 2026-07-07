@@ -42,4 +42,11 @@ export class PrismaPermissionRepository implements IPermissionRepository {
       orderBy: { sortOrder: "asc" },
     });
   }
+
+  async findAll(ctx?: RepoContext): Promise<Permission[]> {
+    return this.db(ctx).permission.findMany({
+      where: { deletedAt: null },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+  }
 }

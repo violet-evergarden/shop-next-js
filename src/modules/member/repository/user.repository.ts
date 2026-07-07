@@ -27,4 +27,8 @@ export interface IUserRepository {
     query: UserAdminQuery,
     ctx?: RepoContext,
   ): Promise<Paginated<UserWithLevel>>;
+  /** 更新用户等级 */
+  updateLevel(id: string, levelId: string, ctx?: RepoContext): Promise<void>;
+  /** 查积分 <= points 的最高等级 */
+  findBestLevelForPoints(points: number, ctx?: RepoContext): Promise<UserLevel | null>;
 }

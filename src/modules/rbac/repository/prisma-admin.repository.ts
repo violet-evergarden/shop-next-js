@@ -1,7 +1,7 @@
 import type { PrismaClient, Admin } from "@prisma/client";
 import type { RepoContext, TransactionClient } from "@/lib/repository";
 import { prisma } from "@/lib/db";
-import type { IAdminRepository } from "./admin.repository";
+import type { IAdminRepository, AdminWithRoles } from "./admin.repository";
 
 export class PrismaAdminRepository implements IAdminRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
@@ -30,5 +30,13 @@ export class PrismaAdminRepository implements IAdminRepository {
       where: { id },
       data: { lastLoginAt: new Date(), lastLoginIp: ip },
     });
+  }
+
+  async findAllWithRoles(ctx?: RepoContext): Promise<AdminWithRoles[]> {
+    return this.db(ctx).admin.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: "asc" },
+      include: { roles: { include: { role: true } } },
+    }) as Promise<AdminWithRoles[]>;
   }
 }
