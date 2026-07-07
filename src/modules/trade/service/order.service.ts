@@ -174,18 +174,11 @@ export class OrderService {
       const earnedPoints = Math.floor(payAmount);
       if (earnedPoints > 0) {
         await this.users.updatePoints(userId, earnedPoints, ctx);
-        // 自动升级:查所有等级(minPoints <= 用户总积分),取最高的
         const user = await this.users.findById(userId, ctx);
         if (user) {
-          const levels = await prisma.userLevel.findMany({
-            where: { minPoints: { lte: user.points } },
-            orderBy: { minPoints: "desc" },
-          });
-          if (levels.length > 0 && user.levelId !== levels[0]!.id) {
-            await prisma.user.update({
-              where: { id: userId },
-              data: { levelId: levels[0]!.id },
-            });
+          const bestLevel = await this.users.findBestLevelForPoints(user.points, ctx);
+          if (bestLevel && user.levelId !== bestLevel.id) {
+            await this.users.updateLevel(userId, bestLevel.id, ctx);
           }
         }
       }

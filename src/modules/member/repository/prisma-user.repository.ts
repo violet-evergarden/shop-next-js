@@ -1,4 +1,4 @@
-import type { PrismaClient, User } from "@prisma/client";
+import type { PrismaClient, User, UserLevel } from "@prisma/client";
 import type { RepoContext } from "@/lib/repository";
 import { prisma } from "@/lib/db";
 import { toSkip, toPaginated, type Paginated } from "@/lib/types";
@@ -76,5 +76,20 @@ export class PrismaUserRepository implements IUserRepository {
       this.db(ctx).user.count({ where }),
     ]);
     return toPaginated(items, total, query);
+  }
+
+  async updateLevel(id: string, levelId: string, ctx?: RepoContext): Promise<void> {
+    await this.db(ctx).user.update({ where: { id }, data: { levelId } });
+  }
+
+  async findBestLevelForPoints(
+    points: number,
+    ctx?: RepoContext,
+  ): Promise<UserLevel | null> {
+    const levels = await this.db(ctx).userLevel.findMany({
+      where: { minPoints: { lte: points } },
+      orderBy: { minPoints: "desc" },
+    });
+    return levels[0] ?? null;
   }
 }
