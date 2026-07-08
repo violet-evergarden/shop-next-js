@@ -73,12 +73,17 @@ async function main() {
   }
   console.log(`✓ super_admin 关联 ${allPerms.length} 个权限`);
 
-  // 3. 管理员账号 admin / admin123
+  // 3. 管理员账号(密码从环境变量读取,无默认值)
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    console.error("✗ 请设置 ADMIN_PASSWORD 环境变量(不使用默认密码)");
+    process.exit(1);
+  }
   const admin = await prisma.admin.upsert({
     where: { username: "admin" },
     create: {
       username: "admin",
-      passwordHash: hashPassword("admin123"),
+      passwordHash: hashPassword(adminPassword),
       realName: "超级管理员",
     },
     update: {},
@@ -88,7 +93,7 @@ async function main() {
     create: { adminId: admin.id, roleId: role.id },
     update: {},
   });
-  console.log("✓ 管理员账号: admin / admin123");
+  console.log("✓ 管理员账号: admin(密码来自 ADMIN_PASSWORD 环境变量)");
 
   // 4. 会员等级
   const levels = [

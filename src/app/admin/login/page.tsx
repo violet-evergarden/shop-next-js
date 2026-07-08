@@ -67,9 +67,6 @@ export default function AdminLoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "登录中…" : "登录"}
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              演示账号 admin / admin123
-            </p>
           </form>
         </CardContent>
       </Card>
