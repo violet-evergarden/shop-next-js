@@ -97,17 +97,19 @@ export class PrismaCouponRepository implements ICouponRepository {
       ) {
         throw new ConflictError("优惠券已领完");
       }
-      // 防重复领取
-      const existing = await tx.userCoupon.findFirst({
-        where: { userId, couponId },
-      });
-      if (existing) {
-        throw new ConflictError("已领取过该优惠券");
-      }
+      // 防重复领取:依赖 @@unique([userId, couponId]) 数据库约束原子兜底,
+      // 避免 findFirst+create 的 check-then-act 竞态(并发请求绕过防重复)。
       const [uc] = await Promise.all([
-        tx.userCoupon.create({
-          data: { userId, couponId, createdBy: ctx?.actorId },
-        }),
+        tx.userCoupon
+          .create({
+            data: { userId, couponId, createdBy: ctx?.actorId },
+          })
+          .catch((e: { code?: string }) => {
+            if (e?.code === "P2002") {
+              throw new ConflictError("已领取过该优惠券");
+            }
+            throw e;
+          }),
         tx.coupon.update({
           where: { id: couponId },
           data: { issuedQuantity: { increment: 1 } },

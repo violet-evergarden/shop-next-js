@@ -47,6 +47,7 @@ model UserCoupon {
   coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Restrict)
   order  Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
+  @@unique([userId, couponId])
   @@index([userId])
   @@index([couponId])
 }
